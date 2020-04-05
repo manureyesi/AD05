@@ -1,4 +1,3 @@
-
 package com.ad.json.pojo;
 
 import java.io.Serializable;
