@@ -27,6 +27,11 @@ public class JsonUtiles {
             throw new ADException("El archivo es nulo");
         }
         
+        //Comprobr si existe el archivo
+        if (!nombreArchivoConexion.exists()) {
+            throw new ADException("El archivo no existe");
+        }
+        
         ObjectMapper mapper = new ObjectMapper();
 
         try {
