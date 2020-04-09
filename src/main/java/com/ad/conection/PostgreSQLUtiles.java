@@ -3,6 +3,8 @@ package com.ad.conection;
 import com.ad.exception.ADException;
 import com.ad.json.pojo.DbConnection;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -92,7 +94,9 @@ public class PostgreSQLUtiles {
             StringBuilder sql = new StringBuilder();
             sql.append("create table ");
             sql.append(NOMBRE_TABLA_ARCHIVOS);
-            sql.append(" (id SERIAL PRIMARY KEY, nombreArchivo varchar(150) not null, idDirectorio integer not null, bytes bytea);");
+            sql.append(" (id SERIAL PRIMARY KEY, nombreArchivo varchar(150) not null, idDirectorio integer not null REFERENCES ");
+            sql.append(NOMBRE_TABLA_DIRECTORIOS);
+            sql.append("(id), bytes bytea);");
             
             try {
                 PreparedStatement statement = conn.prepareStatement(sql.toString());
@@ -256,15 +260,20 @@ public class PostgreSQLUtiles {
             StringBuilder sql = new StringBuilder();
             sql.append("INSERT INTO ");
             sql.append(NOMBRE_TABLA_ARCHIVOS);
-            sql.append(" (nombreArchivo, idDirectorio) VALUES(?, ?);");
+            sql.append(" (nombreArchivo, idDirectorio, bytes) VALUES(?, ?, ?);");
 
             try {
-                    PreparedStatement statement = conn.prepareStatement(sql.toString());
-                    statement.setString(1, file.getName());
-                    statement.setInt(2, idDirectorio);
-                    statement.executeUpdate();
+                
+                //File to Array
+                byte[] bFile = Files.readAllBytes(file.toPath());
+                
+                PreparedStatement statement = conn.prepareStatement(sql.toString());
+                statement.setString(1, file.getName());
+                statement.setInt(2, idDirectorio);
+                statement.setBytes(3, bFile);
+                statement.executeUpdate();
 
-            } catch (SQLException ex) {
+            } catch (IOException | SQLException ex) {
                 throw new ADException("Error ao insertar datos eb DB", ex);
             }
         }
