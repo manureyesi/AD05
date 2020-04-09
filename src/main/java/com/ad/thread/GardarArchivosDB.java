@@ -13,9 +13,9 @@ public class GardarArchivosDB extends Thread {
 
     private DatosDriver datosDriver;
     private final Boolean parar = Boolean.FALSE;
-    
+
     @Override
-    public synchronized void start() {
+    public void run() {
         
         try {
         
@@ -40,7 +40,7 @@ public class GardarArchivosDB extends Thread {
         }
         
     }
-
+    
     public DatosDriver getDatosDriver() {
         return datosDriver;
     }

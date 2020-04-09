@@ -23,10 +23,12 @@ public class FileUtiles {
      */
     public static void crearBackUPDB (final App app, final Connection conn) throws ADException {
     
+        String nomeDirectorio = ".".concat(File.separator);
+        
         File directorio = crearFileAPartirDeApp(app);
         
         //Listar archivos
-        listarDirectorios(conn, directorio);
+        listarDirectorios(conn, directorio, nomeDirectorio);
         
     }
     
@@ -34,12 +36,13 @@ public class FileUtiles {
      * Listar directorios recursivamente
      * @param conn
      * @param directorios
+     * @param path
      * @throws ADException
      */
-    private static void listarDirectorios (final Connection conn, final File directorio) throws ADException {
+    private static void listarDirectorios (final Connection conn, final File directorio, String path) throws ADException {
     
         //Gardar ruta en DB
-        Integer id = PostgreSQLUtiles.insertarEnDBDirectorios(conn, directorio.getAbsolutePath());
+        Integer id = PostgreSQLUtiles.insertarEnDBDirectorios(conn, path);
         
         //Listar archivos
         List<File> directorios = Arrays.asList(directorio.listFiles());
@@ -50,10 +53,13 @@ public class FileUtiles {
             //Comprobar si es directorio
             if (file.isDirectory()) {
             
+                //Añadir a path
+                path = path.concat(file.getName()).concat(File.separator);
+                
                 //Gardar ruta en DB
-                PostgreSQLUtiles.insertarEnDBDirectorios(conn, directorio.getAbsolutePath());
+                PostgreSQLUtiles.insertarEnDBDirectorios(conn, path);
                 //Listar directorios
-                listarDirectorios(conn, file);
+                listarDirectorios(conn, file, path);
                 
             } else {
                 

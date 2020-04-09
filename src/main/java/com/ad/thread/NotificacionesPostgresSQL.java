@@ -19,7 +19,7 @@ public class NotificacionesPostgresSQL extends Thread {
     private final Boolean parar = Boolean.FALSE;
 
     @Override
-    public synchronized void start() {
+    public void run() {
         
         try {
         

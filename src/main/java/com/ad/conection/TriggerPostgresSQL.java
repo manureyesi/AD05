@@ -79,7 +79,9 @@ public class TriggerPostgresSQL {
             sqlCreateTrigger.append("ON ");
             sqlCreateTrigger.append(PostgreSQLUtiles.NOMBRE_TABLA_ARCHIVOS);
             sqlCreateTrigger.append(" FOR EACH ROW ");
-            sqlCreateTrigger.append("EXECUTE PROCEDURE notificar_mensaxe(); ");
+            sqlCreateTrigger.append("EXECUTE PROCEDURE ");
+            sqlCreateTrigger.append(NOMBRE_FUNCTION);
+            sqlCreateTrigger.append(";");
             
             createTrigger = conn.prepareCall(sqlCreateTrigger.toString());
             createTrigger.execute();
