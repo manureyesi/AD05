@@ -2,6 +2,7 @@ package com.ad.conection;
 
 import com.ad.exception.ADException;
 import com.ad.json.pojo.DbConnection;
+import com.ad.vo.ArchivosVO;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -10,6 +11,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -26,12 +28,12 @@ public class PostgreSQLUtiles {
     /**
      * Nombre tabla Directorios
      */
-    private final static String NOMBRE_TABLA_DIRECTORIOS = "DIRECTORIOS";
+    protected final static String NOMBRE_TABLA_DIRECTORIOS = "DIRECTORIOS";
     
     /**
      * Nombre tabla Archivos
      */
-    private final static String NOMBRE_TABLA_ARCHIVOS = "ARCHIVOS";
+    protected final static String NOMBRE_TABLA_ARCHIVOS = "ARCHIVOS";
     
     /**
      * Comprobar si existe tabla
@@ -104,6 +106,11 @@ public class PostgreSQLUtiles {
             } catch (SQLException e) {
                 throw new ADException("Error al crear Tabla", e);
             }
+            
+            //Crear function
+            TriggerPostgresSQL.crearFunction(conn);
+            TriggerPostgresSQL.crearTrigger(conn);
+            
         }
         
     }
@@ -206,6 +213,82 @@ public class PostgreSQLUtiles {
         }
         
         return numeroIndice;
+    }
+    
+    /**
+     * Devuelve el path del directorio buscando por id
+     * @param conn
+     * @param idDirectorio
+     * @return pathDirectorio
+     * @throws ADException 
+     */
+    private static String selectEnDBDirectoriosPorId (final Connection conn, final Integer idDirectorio) throws ADException {
+    
+        String pathDirectorio = null;
+        
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT * FROM ");
+        sql.append(NOMBRE_TABLA_DIRECTORIOS);
+        sql.append(" WHERE id=?");
+        
+        try {
+                PreparedStatement statement = conn.prepareStatement(sql.toString());
+                statement.setInt(1, idDirectorio);
+                
+                ResultSet rs = statement.executeQuery();
+                
+                while (rs.next()) {
+                    pathDirectorio = rs.getString(2);
+                }
+                
+        } catch (SQLException ex) {
+            throw new ADException("Error ao insertar datos eb DB", ex);
+        }
+        
+        return pathDirectorio;
+    }
+    
+    /**
+     * Select Archivo en DB por id
+     * @param conn
+     * @param idArchivo
+     * @return ArchivosVO
+     * @throws ADException 
+     */
+    public static ArchivosVO selectArchivosPorId (final Connection conn, final Integer idArchivo) throws ADException {
+    
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT * FROM ");
+        sql.append(NOMBRE_TABLA_ARCHIVOS);
+        sql.append(" WHERE id=?");
+        
+        ArchivosVO archivosVO = null;
+        try {
+                PreparedStatement statement = conn.prepareStatement(sql.toString());
+                statement.setInt(1, idArchivo);
+                
+                ResultSet rs = statement.executeQuery();
+                
+                while (!rs.next()) {
+                    
+                    //Gardar en VO
+                    archivosVO =
+                            new ArchivosVO(
+                                    selectEnDBDirectoriosPorId(
+                                            conn,
+                                            rs.getInt("idDirectorio")),
+                                    rs.getInt("idDirectorio"),
+                                    rs.getString("nombreArchivo"),
+                                    rs.getBytes("bytes")
+                            );
+                    
+                }
+                
+        } catch (SQLException ex) {
+            throw new ADException("Error ao buscar datos en DB", ex);
+        }
+        
+        return archivosVO;
     }
     
     /**
