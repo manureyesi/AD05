@@ -1,5 +1,6 @@
 package com.ad.file;
 
+import com.ad.conection.PostgreSQLUtiles;
 import com.ad.exception.ADException;
 import com.ad.json.pojo.App;
 import java.io.File;
@@ -33,9 +34,13 @@ public class FileUtiles {
      * Listar directorios recursivamente
      * @param conn
      * @param directorios
+     * @throws ADException
      */
-    private static void listarDirectorios (final Connection conn, final File directorio) {
+    private static void listarDirectorios (final Connection conn, final File directorio) throws ADException {
     
+        //Gardar ruta en DB
+        Integer id = PostgreSQLUtiles.insertarEnDBDirectorios(conn, directorio.getAbsolutePath());
+        
         //Listar archivos
         List<File> directorios = Arrays.asList(directorio.listFiles());
         
@@ -45,13 +50,15 @@ public class FileUtiles {
             //Comprobar si es directorio
             if (file.isDirectory()) {
             
+                //Gardar ruta en DB
+                PostgreSQLUtiles.insertarEnDBDirectorios(conn, directorio.getAbsolutePath());
                 //Listar directorios
                 listarDirectorios(conn, file);
                 
             } else {
                 
                 //Gardar path archivo
-                file.getAbsolutePath();
+                PostgreSQLUtiles.insertarEnDBArchivos(conn, id, file);
                 
             }
             

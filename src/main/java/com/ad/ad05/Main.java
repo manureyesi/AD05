@@ -1,5 +1,6 @@
 package com.ad.ad05;
 
+import com.ad.exception.ADException;
 import com.ad.miniDrive.MiniDrive;
 
 /**
@@ -15,8 +16,13 @@ public class Main {
         
         final String datosArchivo = "Datos_driver.json";
         
-        //Lanzar MiniDrive
-        MiniDrive.lanzarMiniDrive(datosArchivo);
+        try {
+            //Lanzar MiniDrive
+            MiniDrive.lanzarMiniDrive(datosArchivo);
+        } catch (ADException ex) {
+            System.err.println(ex.getDescripcionError());
+            ex.printStackTrace();
+        }
         
     }
     
