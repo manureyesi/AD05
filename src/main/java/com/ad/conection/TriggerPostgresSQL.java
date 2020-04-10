@@ -20,12 +20,17 @@ public class TriggerPostgresSQL {
     /**
      * Nombre del evento de escucha
      */
-    private static final String NOMBRE_EVENTO_ESCUCHA = "novoArchivo";
+    private static final String NOMBRE_EVENTO_ESCUCHA = "novoarchivo";
     
     /**
      * Nombre funcion
      */
     private static final String NOMBRE_FUNCTION = "notificar_archivo()";
+    
+    /**
+     * Not novo archivo
+     */
+    private static final String NOT_NOVO_ARCHIVO = "not_novo_archivo";
     
     /**
      * Create Function PostgresSQL
@@ -50,6 +55,8 @@ public class TriggerPostgresSQL {
             sqlCreateFunction.append("END; ");
             sqlCreateFunction.append("$$ LANGUAGE plpgsql; ");
 
+            System.out.println(sqlCreateFunction.toString());
+            
             createFunction = conn.prepareCall(sqlCreateFunction.toString());
             createFunction.execute();
             createFunction.close();
@@ -71,17 +78,22 @@ public class TriggerPostgresSQL {
         try {
         
             StringBuilder sqlCreateTrigger = new StringBuilder();
-            sqlCreateTrigger.append("DROP TRIGGER IF EXISTS not_novo_archivo ON ");
+            sqlCreateTrigger.append("DROP TRIGGER IF EXISTS ");
+            sqlCreateTrigger.append(NOT_NOVO_ARCHIVO);
+            sqlCreateTrigger.append(" ON ");
             sqlCreateTrigger.append(PostgreSQLUtiles.NOMBRE_TABLA_ARCHIVOS);
             sqlCreateTrigger.append("; ");
-            sqlCreateTrigger.append("CREATE TRIGGER not_novo_archivo ");
-            sqlCreateTrigger.append("AFTER INSERT ");
+            sqlCreateTrigger.append("CREATE TRIGGER ");
+            sqlCreateTrigger.append(NOT_NOVO_ARCHIVO);
+            sqlCreateTrigger.append(" AFTER INSERT ");
             sqlCreateTrigger.append("ON ");
             sqlCreateTrigger.append(PostgreSQLUtiles.NOMBRE_TABLA_ARCHIVOS);
             sqlCreateTrigger.append(" FOR EACH ROW ");
             sqlCreateTrigger.append("EXECUTE PROCEDURE ");
             sqlCreateTrigger.append(NOMBRE_FUNCTION);
             sqlCreateTrigger.append(";");
+            
+            System.out.println(sqlCreateTrigger.toString());
             
             createTrigger = conn.prepareCall(sqlCreateTrigger.toString());
             createTrigger.execute();

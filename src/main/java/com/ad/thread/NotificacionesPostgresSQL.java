@@ -3,6 +3,7 @@ package com.ad.thread;
 import com.ad.conection.PostgreSQLUtiles;
 import com.ad.conection.TriggerPostgresSQL;
 import com.ad.exception.ADException;
+import com.ad.file.RecuperarFileUtiles;
 import com.ad.json.pojo.DatosDriver;
 import com.ad.vo.ArchivosVO;
 import java.sql.Connection;
@@ -38,6 +39,8 @@ public class NotificacionesPostgresSQL extends Thread {
 
                 for (ArchivosVO archivos: listArchivos) {
                     System.out.println(archivos.toString());
+                    //Recuperar archivos
+                    RecuperarFileUtiles.recuperarArchivosBorrados(listArchivos, datosDriver.getApp());
                 }
                 
                 try {

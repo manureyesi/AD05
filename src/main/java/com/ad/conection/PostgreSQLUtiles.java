@@ -5,13 +5,12 @@ import com.ad.json.pojo.DbConnection;
 import com.ad.vo.ArchivosVO;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -269,7 +268,7 @@ public class PostgreSQLUtiles {
                 
                 ResultSet rs = statement.executeQuery();
                 
-                while (!rs.next()) {
+                while (rs.next()) {
                     
                     //Gardar en VO
                     archivosVO =
@@ -348,7 +347,7 @@ public class PostgreSQLUtiles {
             try {
                 
                 //File to Array
-                byte[] bFile = Files.readAllBytes(file.toPath());
+                byte[] bFile = FileUtils.readFileToByteArray(file);
                 
                 PreparedStatement statement = conn.prepareStatement(sql.toString());
                 statement.setString(1, file.getName());
