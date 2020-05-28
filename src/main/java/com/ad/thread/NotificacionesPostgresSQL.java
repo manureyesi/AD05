@@ -28,9 +28,6 @@ public class NotificacionesPostgresSQL extends Thread {
             Connection conn =
                     PostgreSQLUtiles.crearConexionPostgresSQL(datosDriver.getDbConnection());
         
-            //Recuperar archivos
-            RecuperarFileUtiles.recuperarArchivosBorrados(datosDriver.getApp(), conn);
-            
             //Crear evento escucha
             PGConnection PGConnection =
                     TriggerPostgresSQL.escucharMensajes(conn);
@@ -43,7 +40,7 @@ public class NotificacionesPostgresSQL extends Thread {
                 for (ArchivosVO archivos: listArchivos) {
                     System.out.println(archivos.toString());
                     //Recuperar archivos
-                    RecuperarFileUtiles.esperarArchivosNuevos(listArchivos, datosDriver.getApp());
+                    RecuperarFileUtiles.recuperarArchivosBorrados(listArchivos, datosDriver.getApp());
                 }
                 
                 try {
