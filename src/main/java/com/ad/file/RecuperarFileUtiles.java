@@ -1,10 +1,13 @@
 package com.ad.file;
 
+import com.ad.conection.PostgreSQLUtiles;
 import com.ad.exception.ADException;
 import com.ad.json.pojo.App;
 import com.ad.vo.ArchivosVO;
+import com.ad.vo.DirectorioVO;
 import java.io.File;
 import java.io.IOException;
+import java.sql.Connection;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
 
@@ -26,11 +29,63 @@ public class RecuperarFileUtiles {
     
     /**
      * Recuperar archicos Borrados
+     * @param app
+     * @param conn
+     * @throws ADException 
+     */
+    public static void recuperarArchivosBorrados (final App app, final Connection conn) throws ADException {
+    
+        String nomeDirectorioRaiz = ".".concat(File.separator);
+     
+        System.out.println("Listando archivos del directorios para hacer backup");
+        
+        List<DirectorioVO> listaDirectorios =
+                PostgreSQLUtiles.seleccionarTodosLosDirectorios(conn);
+     
+        for (DirectorioVO dir: listaDirectorios) {
+            
+            crearDirectorioSiNoExiste(app.getDirectory(), dir.getNombreDirectorio());
+            
+        }
+        
+        List<ArchivosVO> listArchivos =
+                PostgreSQLUtiles.selectTodosArchivosArchivos(conn);
+        
+        //Crear archivos Nuevos
+        esperarArchivosNuevos(listArchivos, app);
+        
+    }
+    
+    /**
+     * Crear directorios si no existen
+     * @param pathBackup
+     * @param directorioDb 
+     */
+    private static void crearDirectorioSiNoExiste (final String pathBackup, final String directorioDb) {
+    
+        StringBuilder pathDirectorio = new StringBuilder();
+        pathDirectorio.append(pathBackup);
+        //Comprobar si es el directorio raiz
+        if (directorioDb.equals(".".concat(comprobarSeparador(directorioDb)))) {
+            pathDirectorio.append(directorioDb.replaceAll(comprobarSeparador(directorioDb), File.separator));
+        }
+        
+        File archivoCrear = new File (pathDirectorio.toString());
+        
+        //Comrprobar si existe archivo
+        if (!archivoCrear.exists()) {
+            archivoCrear.mkdirs();
+        }
+        
+    }
+    
+    /**
+     * Esperar archivos nuevos para descargar
      * @param listaArchivos
      * @param app
      * @throws ADException 
      */
-    public static void recuperarArchivosBorrados (final List<ArchivosVO> listaArchivos, final App app) throws ADException {
+    public static void esperarArchivosNuevos (final List<ArchivosVO> listaArchivos, final App app) throws ADException {
     
         //LIsta archivos
         for (ArchivosVO archivosVO: listaArchivos) {

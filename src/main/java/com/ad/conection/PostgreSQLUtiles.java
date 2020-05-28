@@ -3,6 +3,7 @@ package com.ad.conection;
 import com.ad.exception.ADException;
 import com.ad.json.pojo.DbConnection;
 import com.ad.vo.ArchivosVO;
+import com.ad.vo.DirectorioVO;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
@@ -10,6 +11,8 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -188,7 +191,7 @@ public class PostgreSQLUtiles {
      * @return
      * @throws ADException 
      */
-    private static Integer selectEnDBDirectorios (final Connection conn, final String rutaFile) throws ADException {
+    public static Integer selectEnDBDirectorios (final Connection conn, final String rutaFile) throws ADException {
     
         Integer numeroIndice = null;
         
@@ -212,6 +215,134 @@ public class PostgreSQLUtiles {
         }
         
         return numeroIndice;
+    }
+    
+    /**
+     * Seleccionar todos los directorios
+     * @param conn
+     * @return
+     * @throws ADException 
+     */
+    public static List<DirectorioVO> seleccionarTodosLosDirectorios (final Connection conn) 
+            throws ADException {
+    
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT * FROM ");
+        sql.append(NOMBRE_TABLA_DIRECTORIOS);
+        sql.append(" WHERE 1 = 1 ORDER BY nombredirectorio");
+        
+         List<DirectorioVO> listDirectorios = new ArrayList<>();
+        DirectorioVO directorioVO = null;
+        try {
+                PreparedStatement statement = conn.prepareStatement(sql.toString());
+                
+                ResultSet rs = statement.executeQuery();
+                
+                while (rs.next()) {
+                    
+                    //Gardar en VO
+                    directorioVO =
+                            new DirectorioVO(
+                                    rs.getInt("id"),
+                                    rs.getString("nombredirectorio")
+                            );
+                    listDirectorios.add(directorioVO);
+                }
+                
+        } catch (SQLException ex) {
+            throw new ADException("Error ao buscar datos en DB", ex);
+        }
+        
+        return listDirectorios;
+        
+    }
+    
+    /**
+     * Select archivos por id directorio
+     * @param conn
+     * @param idDirectorio
+     * @return
+     * @throws ADException 
+     */
+    public static List<ArchivosVO> selectArchivosPorIdDirectorio (final Connection conn, final Integer idDirectorio)
+            throws ADException {
+        
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT * FROM ");
+        sql.append(NOMBRE_TABLA_ARCHIVOS);
+        sql.append(" WHERE idDirectorio=?");
+        
+        List<ArchivosVO> listaArchivosVO = new ArrayList<>();
+        ArchivosVO archivosVO = null;
+        try {
+                PreparedStatement statement = conn.prepareStatement(sql.toString());
+                statement.setInt(1, idDirectorio);
+                
+                ResultSet rs = statement.executeQuery();
+                
+                while (rs.next()) {
+                    
+                    //Gardar en VO
+                    archivosVO =
+                            new ArchivosVO(
+                                    selectEnDBDirectoriosPorId(
+                                            conn,
+                                            rs.getInt("idDirectorio")),
+                                    rs.getInt("idDirectorio"),
+                                    rs.getString("nombreArchivo"),
+                                    rs.getBytes("bytes")
+                            );
+                    listaArchivosVO.add(archivosVO);
+                }
+                
+        } catch (SQLException ex) {
+            throw new ADException("Error ao buscar datos en DB", ex);
+        }
+        
+        return listaArchivosVO;
+    }
+    
+    /**
+     * Buscar todos los archivos en DB
+     * @param conn
+     * @return
+     * @throws ADException 
+     */
+    public static List<ArchivosVO> selectTodosArchivosArchivos (final Connection conn)
+            throws ADException {
+        
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT * FROM ");
+        sql.append(NOMBRE_TABLA_ARCHIVOS);
+        sql.append(" WHERE 1 = 1");
+        
+        List<ArchivosVO> listaArchivosVO = new ArrayList<>();
+        ArchivosVO archivosVO = null;
+        try {
+                PreparedStatement statement = conn.prepareStatement(sql.toString());
+                
+                ResultSet rs = statement.executeQuery();
+                
+                while (rs.next()) {
+                    
+                    //Gardar en VO
+                    archivosVO =
+                            new ArchivosVO(
+                                    selectEnDBDirectoriosPorId(
+                                            conn,
+                                            rs.getInt("idDirectorio")),
+                                    rs.getInt("idDirectorio"),
+                                    rs.getString("nombreArchivo"),
+                                    rs.getBytes("bytes")
+                            );
+                    listaArchivosVO.add(archivosVO);
+                }
+                
+        } catch (SQLException ex) {
+            throw new ADException("Error ao buscar datos en DB", ex);
+        }
+        
+        return listaArchivosVO;
     }
     
     /**
